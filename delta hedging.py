@@ -1,4 +1,4 @@
-# Delta Hedging with and without transaction costs
+#Delta Hedging with and without transaction costs
 delta = test_data['delta'].values
 bid_price = test_data['bid'].values
 ask_price = test_data['ask'].values
