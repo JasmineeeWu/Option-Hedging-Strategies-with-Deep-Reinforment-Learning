@@ -6,9 +6,9 @@ class OptionHedgingEnv(gym.Env):
         self.current_step = 0
         self.action_space = gym.spaces.Discrete(3)  # Buy, Hold, Sell
         self.observation_space = gym.spaces.Box(low=-np.inf, high=np.inf, shape=(self.data.shape[1],), dtype=np.float32)
-        self.position = 0  # Initial position: 0 (no position)
-        self.cost = 0.01  # Transaction cost as proportion of bid-ask spread
-
+        self.position = 0 
+        self.cost = 0.01
+        
     def reset(self):
         self.current_step = 0
         self.position = 0
@@ -25,20 +25,20 @@ class OptionHedgingEnv(gym.Env):
         bid_price = self.data.iloc[self.current_step]['bid']
         ask_price = self.data.iloc[self.current_step]['ask']
 
-        # Calculate P&L
+        #Calculate P&L
         pnl = 0
         transaction_cost = 0
         if action == 0:  #Buy
             transaction_cost = self.cost * (ask_price - bid_price)
             pnl = curr_price - ask_price - transaction_cost
             self.position = 1
+        elif action == 1:  #Hold
+            pnl = (curr_price - prev_price) * self.position
         elif action == 2:  #Sell
             transaction_cost = self.cost * (ask_price - bid_price)
             pnl = bid_price - curr_price - transaction_cost
             self.position = -1
-        elif action == 1:  #Hold
-            pnl = (curr_price - prev_price) * self.position
-
+        
         reward = pnl - transaction_cost
         done = self.current_step == len(self.data) - 1
         return obs, reward, done, {}
