@@ -5,10 +5,10 @@ input_shape = (train_env.observation_space.shape[0],)
 output_shape = train_env.action_space.n
 model = build_dqn_model(input_shape, output_shape)
 
-# Replay Memory
+#Replay Memory
 memory = ReplayMemory(20)
 
-# Training Parameters
+#Training Parameters
 gamma = 0.99
 epsilon = 1.0
 epsilon_min = 0.01
@@ -16,14 +16,14 @@ epsilon_decay = 0.995
 batch_size = 64
 num_episodes = 10
 
-# Action selection
+#Action selection
 def select_action(state, epsilon):
     if np.random.rand() <= epsilon:
         return train_env.action_space.sample()
     q_values = model.predict(np.expand_dims(state, axis=0))
     return np.argmax(q_values[0])
 
-# Optimize the model
+#Optimize the model
 def optimize_model():
     if len(memory) < batch_size:
         return
@@ -45,7 +45,7 @@ def optimize_model():
 
     model.train_on_batch(batch_state, target_q_values)
 
-# Train the model
+#Train the model
 for episode in range(num_episodes):
     state = train_env.reset()
     total_reward = 0
@@ -61,7 +61,7 @@ for episode in range(num_episodes):
     epsilon = max(epsilon_min, epsilon * epsilon_decay)
     print(f"Episode {episode + 1}, Total Reward: {total_reward}")
 
-# Evaluate the model
+#Evaluate the model
 state = test_env.reset()
 total_rewards = 0
 actual_rewards = []
