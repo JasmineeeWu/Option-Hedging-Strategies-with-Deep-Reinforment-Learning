@@ -1,4 +1,4 @@
-# Define the environment
+#Define the environment
 class OptionHedgingEnv(gym.Env):
     def __init__(self, data):
         super(OptionHedgingEnv, self).__init__()
@@ -28,15 +28,15 @@ class OptionHedgingEnv(gym.Env):
         # Calculate P&L
         pnl = 0
         transaction_cost = 0
-        if action == 0:  # Buy
+        if action == 0:  #Buy
             transaction_cost = self.cost * (ask_price - bid_price)
             pnl = curr_price - ask_price - transaction_cost
             self.position = 1
-        elif action == 2:  # Sell
+        elif action == 2:  #Sell
             transaction_cost = self.cost * (ask_price - bid_price)
             pnl = bid_price - curr_price - transaction_cost
             self.position = -1
-        elif action == 1:  # Hold
+        elif action == 1:  #Hold
             pnl = (curr_price - prev_price) * self.position
 
         reward = pnl - transaction_cost
