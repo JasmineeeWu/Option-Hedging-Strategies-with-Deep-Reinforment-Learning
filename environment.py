@@ -1,29 +1,29 @@
-# Define the Reinforcement Learning Environment
+# Define the environment
 class OptionHedgingEnv(gym.Env):
     def __init__(self, data):
         super(OptionHedgingEnv, self).__init__()
         self.data = data.reset_index(drop=True)
         self.current_step = 0
         self.action_space = gym.spaces.Discrete(3)  # Buy, Hold, Sell
-        self.observation_space = gym.spaces.Box(low=-np.inf, high=np.inf, shape=(data.shape[1] - 1,), dtype=np.float32)
+        self.observation_space = gym.spaces.Box(low=-np.inf, high=np.inf, shape=(self.data.shape[1],), dtype=np.float32)
         self.position = 0  # Initial position: 0 (no position)
         self.cost = 0.01  # Transaction cost as proportion of bid-ask spread
 
     def reset(self):
         self.current_step = 0
         self.position = 0
-        return self.data.iloc[self.current_step].drop('last').values
+        return self.data.iloc[self.current_step].values.astype(np.float32)
 
     def step(self, action):
-        prev_price = self.data.iloc[self.current_step]['last']
+        prev_price = self.data.iloc[self.current_step]['underlying_price']
         self.current_step += 1
         if self.current_step >= len(self.data):
             self.current_step = 0
 
-        obs = self.data.iloc[self.current_step].drop('last').values
-        curr_price = self.data.iloc[self.current_step]['last']
-        bid_price = curr_price * (1 - self.cost / 2)
-        ask_price = curr_price * (1 + self.cost / 2)
+        obs = self.data.iloc[self.current_step].values.astype(np.float32)
+        curr_price = self.data.iloc[self.current_step]['underlying_price']
+        bid_price = self.data.iloc[self.current_step]['bid']
+        ask_price = self.data.iloc[self.current_step]['ask']
 
         # Calculate P&L
         pnl = 0
