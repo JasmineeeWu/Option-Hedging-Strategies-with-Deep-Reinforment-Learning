@@ -9,7 +9,7 @@ class Simulator:
         self.process = process
         self.D = periods_in_day
         self.bid_ask_spread = bid_ask_spread
-        self.rf_df = rf_df  # DataFrame containing risk-free rates
+        self.rf_df = rf_df
 
     def set_properties_gbm(self, q, mu):
         self.q = q
@@ -99,7 +99,7 @@ class Simulator:
                 expiration_date = pd.to_datetime(df['expiration'].iloc[t])
                 rf_rate_row = self.rf_df.loc[self.rf_df['Date'] == expiration_date]
                 if not rf_rate_row.empty:
-                    rf_rate = rf_rate_row['RF'].values[0] / 100  # Convert to decimal
+                    rf_rate = rf_rate_row['RF'].values[0] / 100
                 else:
                     rf_rate = self.rf_df['RF'].iloc[-1] / 100
 
