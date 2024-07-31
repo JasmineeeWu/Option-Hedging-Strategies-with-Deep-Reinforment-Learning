@@ -1,4 +1,4 @@
-| Data Type         | Data Amount | Training Period     | Testing Period     | Delta Hedging P&L with c | Delta Hedging P&L without c | DRL Training Data Amount | DRL P&L        |
+|                   | Data Amount | Training Period     | Testing Period     | Delta Hedging P&L with c | Delta Hedging P&L without c | DRL Training Data Amount | DRL P&L        |
 |-------------------|-------------|---------------------|--------------------|--------------------------|-----------------------------|--------------------------|----------------|
 | **Historical Data** | 59,452      | 01/06 - 21/06       | 21/06 - 28/06      | -3,660.94              | -3,477.59                   | 45,166                   | 58,829.64   |
 | **Synthetic Data** | 70,560      | 01/06 - 21/06       | 21/06 - 28/06      | -25.76             | -25.50                | 45,166                   | 574.27    |
