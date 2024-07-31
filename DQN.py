@@ -1,4 +1,4 @@
-# Define the DQN Model with TensorFlow
+#Define the DQN Model with TensorFlow
 def build_dqn_model(input_shape, output_shape):
     model = models.Sequential()
     model.add(layers.Dense(64, input_shape=input_shape, activation='relu'))
