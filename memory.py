@@ -1,4 +1,4 @@
-# Experience Replay Memory
+#Replay Memory
 class ReplayMemory:
     def __init__(self, capacity):
         self.capacity = capacity
