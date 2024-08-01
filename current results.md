@@ -1,8 +1,3 @@
-|                   | Data Amount | Training Period     | Testing Period     | Delta Hedging P&L with c | Delta Hedging P&L without c | DRL Training Data Amount | DRL P&L        |
-|-------------------|-------------|---------------------|--------------------|--------------------------|-----------------------------|--------------------------|----------------|
-| **Historical Data** | 59,452      | 01/06 - 21/06       | 21/06 - 28/06      | -3,660.94              | -3,477.59                   | 45,166                   | 58,829.64   |
-| **Synthetic Data** | 70,560      | 01/06 - 21/06       | 21/06 - 28/06      | -25.76             | -25.50                | 45,166                   | 574.27    |
-
 | Data Type        | Data Amount | Training Period | Testing Period | Delta Hedging P&L with c | Sharpe Ratio | Delta Hedging P&L without c | Sharpe Ratio | DRL Training Data Amount | DRL P&L       | Sharpe Ratio |
 |------------------|-------------|-----------------|----------------|--------------------------|--------------|-----------------------------|--------------|---------------------------|---------------|--------------|
 | **Historical Data**  | 59452       | 01/06 - 21/06   | 21/06 - 28/06  | -3660.9403               |              | -3477.59                    |              | 45166                     | 58829.64346   |              |
