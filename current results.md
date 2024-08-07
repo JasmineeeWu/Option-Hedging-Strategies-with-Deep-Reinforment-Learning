@@ -9,6 +9,9 @@
 |                  |             |                 |                | -15.76047969             |              | -15.60443533                |              |                           | 23.61393472   |              |
 |                  |             |                 |                | -24.07896682             |              | -23.84056121                |              |                           |               |              |
 
+![1](https://github.com/user-attachments/assets/c36a64f6-bfe9-4ec1-9052-a47734b8cd70)
+![2](https://github.com/user-attachments/assets/c24be8ee-0962-4233-b7e0-eca48d07d06d)
+![3](https://github.com/user-attachments/assets/1ff49eb0-0466-42c4-92c1-10dfb2aac1d5)
+![4](https://github.com/user-attachments/assets/8f9b6e68-258c-4bad-969d-7f3adf363dcc)
 
 
-![Overview](C:/Users/23941/OneDrive - University College London/Desktop/Results/1.png)
