@@ -58,7 +58,7 @@ test_data_processed['ask'] = test_data['ask'].values
 
 # Define the environment with proportional transaction cost based on bid-ask spread
 class OptionHedgingEnv(gym.Env):
-    def __init__(self, data, xi=0.1, transaction_cost_proportion=0.05):
+    def __init__(self, data, xi=0.1, transaction_cost_proportion=0.5):
         super(OptionHedgingEnv, self).__init__()
         self.data = data.reset_index(drop=True)
         self.current_step = 0
@@ -145,10 +145,10 @@ class ReplayMemory:
     def __len__(self):
         return len(self.memory)
 
-# Create the environments with a proportional transaction cost of 0.05
-train_env = OptionHedgingEnv(train_data_processed, xi=0.1, transaction_cost_proportion=0.05)
-validation_env = OptionHedgingEnv(validation_data_processed, xi=0.1, transaction_cost_proportion=0.05)
-test_env = OptionHedgingEnv(test_data_processed, xi=0.1, transaction_cost_proportion=0.05)
+# Create the environments with a proportional transaction cost of 0.5
+train_env = OptionHedgingEnv(train_data_processed, xi=0.1, transaction_cost_proportion=0.5)
+validation_env = OptionHedgingEnv(validation_data_processed, xi=0.1, transaction_cost_proportion=0.5)
+test_env = OptionHedgingEnv(test_data_processed, xi=0.1, transaction_cost_proportion=0.5)
 
 
 input_shape = (train_env.observation_space.shape[0],)
@@ -164,7 +164,7 @@ epsilon = 1.0
 epsilon_min = 0.1
 epsilon_decay = 0.995
 batch_size = 64
-num_episodes = 5
+num_episodes = 3
 
 # Action selection
 def select_action(state, epsilon):
