@@ -56,7 +56,7 @@ test_data_processed['ask'] = test_data['ask'].values
 
 # Define the environment with proportional transaction cost based on bid-ask spread
 class OptionHedgingEnv(gym.Env):
-    def __init__(self, data, xi=0.1, transaction_cost_proportion=0.05):
+    def __init__(self, data, xi=0.1, transaction_cost_proportion=0.5):
         super(OptionHedgingEnv, self).__init__()
         self.data = data.reset_index(drop=True)
         self.current_step = 0
@@ -122,10 +122,12 @@ class OptionHedgingEnv(gym.Env):
 # Define the Actor-Critic Models with TensorFlow
 def build_actor(input_shape, action_dim):
     model = models.Sequential()
-    model.add(layers.Dense(16, input_shape=input_shape, activation='relu'))
-    model.add(layers.Dense(16, activation='relu'))
-    model.add(layers.Dense(action_dim, activation='tanh'))  # Tanh for continuous actions
+    model.add(layers.Dense(16, input_shape=input_shape, activation='relu', kernel_regularizer=tf.keras.regularizers.l2(0.01)))
+    model.add(layers.Dropout(0.2))
+    model.add(layers.Dense(16, activation='relu', kernel_regularizer=tf.keras.regularizers.l2(0.01)))
+    model.add(layers.Dense(action_dim, activation='tanh'))
     return model
+
 
 def build_critic(input_shape, action_dim):
     state_input = layers.Input(shape=input_shape)
@@ -141,14 +143,14 @@ gamma = 0.95
 tau = 0.01  # Target network update parameter
 actor_lr = 1e-3
 critic_lr = 1e-3
-buffer_size = 20
+buffer_size = 100
 batch_size = 64
-num_episodes = 5
+num_episodes = 3
 
 # Environment and Models Initialization
-train_env = OptionHedgingEnv(train_data_processed, xi=0.1, transaction_cost_proportion=0.05)
-validation_env = OptionHedgingEnv(validation_data_processed, xi=0.1, transaction_cost_proportion=0.05)
-test_env = OptionHedgingEnv(test_data_processed, xi=0.1, transaction_cost_proportion=0.05)
+train_env = OptionHedgingEnv(train_data_processed, xi=0.1, transaction_cost_proportion=0.5)
+validation_env = OptionHedgingEnv(validation_data_processed, xi=0.1, transaction_cost_proportion=0.5)
+test_env = OptionHedgingEnv(test_data_processed, xi=0.1, transaction_cost_proportion=0.5)
 
 input_shape = (train_env.observation_space.shape[0],)
 action_dim = train_env.action_space.shape[0]
@@ -182,25 +184,23 @@ def update_target_networks(tau):
         new_weights.append(tau * model_weights + (1 - tau) * target_weights)
     target_critic.set_weights(new_weights)
 
-# Function to select an action using the actor network with added noise for exploration
-def select_action(state):
+def select_action(state, noise_scale=0.05):
     state = np.expand_dims(state, axis=0)
     action = actor(state, training=False).numpy()[0]
-    noise = np.random.normal(scale=0.05, size=action_dim)  # Exploration noise
+    noise = np.random.normal(scale=noise_scale, size=action_dim)  # Exploration noise
     return np.clip(action + noise, train_env.action_space.low, train_env.action_space.high)
 
-# Function to train the models
 def train():
     if len(memory) < batch_size:
         return
     mini_batch = random.sample(memory, batch_size)
     states, actions, rewards, next_states, dones = zip(*mini_batch)
 
-    states = np.array(states, dtype=np.float32)
-    actions = np.array(actions, dtype=np.float32)
-    rewards = np.array(rewards, dtype=np.float32).reshape(-1, 1)
-    next_states = np.array(next_states, dtype=np.float32)
-    dones = np.array(dones, dtype=np.float32).reshape(-1, 1)
+    states = tf.convert_to_tensor(np.array(states, dtype=np.float32))
+    actions = tf.convert_to_tensor(np.array(actions, dtype=np.float32))
+    rewards = tf.convert_to_tensor(np.array(rewards, dtype=np.float32).reshape(-1, 1))
+    next_states = tf.convert_to_tensor(np.array(next_states, dtype=np.float32))
+    dones = tf.convert_to_tensor(np.array(dones, dtype=np.float32).reshape(-1, 1))
 
     # Critic update
     with tf.GradientTape() as tape:
@@ -224,12 +224,15 @@ def train():
 validation_cumulative_rewards = []  # Store cumulative rewards at each time step during validation
 testing_cumulative_rewards = []     # Store cumulative rewards at each time step during testing
 
+cumulative_reward_val = 0  # Initialize cumulative reward for validation outside of the loop
+cumulative_reward_test = 0  # Initialize cumulative reward for testing outside of the loop
+
 for episode in range(num_episodes):
     # Training phase
     state = train_env.reset()
     total_reward_train = 0
     while True:
-        action = select_action(state)
+        action = select_action(state, noise_scale=0.05)
         next_state, reward, done, _ = train_env.step(action)
         memory.append((state, action, reward, next_state, done))
         state = next_state
@@ -240,11 +243,10 @@ for episode in range(num_episodes):
 
     # Validation phase
     state_val = validation_env.reset()
-    cumulative_reward_val = 0  # Reset cumulative reward for validation
     while True:
-        action_val = select_action(state_val)
+        action_val = select_action(state_val, noise_scale=0.01)
         next_state_val, reward_val, done_val, _ = validation_env.step(action_val)
-        cumulative_reward_val += reward_val  # Accumulate reward at each time step
+        cumulative_reward_val += reward_val  # Continue accumulating reward across episodes
         validation_cumulative_rewards.append(cumulative_reward_val)  # Store cumulative reward at each time step
         state_val = next_state_val
         if done_val:
@@ -255,11 +257,10 @@ for episode in range(num_episodes):
 # Testing phase
 for _ in range(num_episodes):  # Run through the number of episodes to test
     state_test = test_env.reset()
-    cumulative_reward_test = 0  # Reset cumulative reward for testing
     while True:
-        action_test = select_action(state_test)
+        action_test = select_action(state_test, noise_scale=0)
         next_state_test, reward_test, done_test, _ = test_env.step(action_test)
-        cumulative_reward_test += reward_test  # Accumulate reward at each time step
+        cumulative_reward_test += reward_test  # Continue accumulating reward across episodes
         testing_cumulative_rewards.append(cumulative_reward_test)  # Store cumulative reward at each time step
         state_test = next_state_test
         if done_test:
