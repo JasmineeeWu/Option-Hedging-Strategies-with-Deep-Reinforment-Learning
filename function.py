@@ -63,16 +63,16 @@ def calculate_delta(S, K, r, q, v, T, option_type='call'):
     elif option_type == 'put':
         return norm.cdf(d1) - 1
     else:
-        raise ValueError("NAN'")
+        raise ValueError("Option type must be 'call' or 'put'")
 
 def simulate_delta_hedging(test_data, underlying_prices, bid_ask_spread, transaction_cost_percentage):
     df = test_data.copy()
     df['delta'] = df.apply(lambda row: calculate_delta(
         S=row['underlying_price'],
         K=row['strike'],
-        r=0,  
+        r=0.02,
         q=0.01,  
-        v=0.2, 
+        v=0.2,  
         T=(pd.to_datetime(row['expiration']) - pd.to_datetime(row['quote_datetime'])).days / 365,
         option_type=row['option_type']
     ), axis=1)
