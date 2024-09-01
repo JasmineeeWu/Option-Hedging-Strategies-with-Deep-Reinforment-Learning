@@ -1,29 +1,41 @@
-data['date'] = pd.to_datetime(data['date'])
-data['expiration'] = pd.to_datetime(data['expiration'])
-data['type'] = data['type'].map({'call': 0, 'put': 1})
-data['days_until_expiration'] = (data['expiration'] - data['date']).dt.days
-
-train_data = data[data['date'] <= '2024-06-21']
+# Split the data into training, validation, and test sets
+train_data = data[data['date'] <= '2024-06-14']
+validation_data = data[(data['date'] > '2024-06-14') & (data['date'] <= '2024-06-21')]
 test_data = data[data['date'] > '2024-06-21']
+
+# Preprocess the training data
 train_data = train_data.drop(columns=['contractID', 'symbol', 'expiration', 'strike', 'date'])
-test_data = test_data.drop(columns=['contractID', 'symbol', 'expiration', 'strike', 'date'])
+features_train = train_data.drop(columns=['last', 'bid', 'ask'])
+target_train = train_data['last']
 
-
-features = train_data.drop(columns=['last'])
-target = train_data['last']
 scaler = StandardScaler()
-scaled_features = scaler.fit_transform(features)
+scaled_features_train = scaler.fit_transform(features_train)
 
-pca = PCA(n_components=0.95) 
-reduced_features = pca.fit_transform(scaled_features)
+train_data_processed = pd.DataFrame(scaled_features_train, columns=features_train.columns)
+train_data_processed['last'] = target_train.values
+train_data_processed['bid'] = train_data['bid'].values
+train_data_processed['ask'] = train_data['ask'].values
 
-reduced_features_df = pd.DataFrame(reduced_features)
-reduced_features_df['last'] = target.values
-train_data = reduced_features_df
-test_features = test_data.drop(columns=['last'])
-test_target = test_data['last']
+# Preprocess the validation data
+validation_data = validation_data.drop(columns=['contractID', 'symbol', 'expiration', 'strike', 'date'])
+features_validation = validation_data.drop(columns=['last', 'bid', 'ask'])
+target_validation = validation_data['last']
 
-scaled_test_features = scaler.transform(test_features)
-reduced_test_features = pca.transform(scaled_test_features)
-reduced_test_features_df = pd.DataFrame(reduced_test_features)
-reduced_test_features_df['last'] = test_target.values
+scaled_features_validation = scaler.transform(features_validation)
+
+validation_data_processed = pd.DataFrame(scaled_features_validation, columns=features_validation.columns)
+validation_data_processed['last'] = target_validation.values
+validation_data_processed['bid'] = validation_data['bid'].values
+validation_data_processed['ask'] = validation_data['ask'].values
+
+# Preprocess the test data
+test_data = test_data.drop(columns=['contractID', 'symbol', 'expiration', 'strike', 'date'])
+features_test = test_data.drop(columns=['last', 'bid', 'ask'])
+target_test = test_data['last']
+
+scaled_features_test = scaler.transform(features_test)
+
+test_data_processed = pd.DataFrame(scaled_features_test, columns=features_test.columns)
+test_data_processed['last'] = target_test.values
+test_data_processed['bid'] = test_data['bid'].values
+test_data_processed['ask'] = test_data['ask'].values
