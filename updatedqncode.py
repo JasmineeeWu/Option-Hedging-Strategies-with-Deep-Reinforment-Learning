@@ -3,12 +3,12 @@ class OptionHedgingEnv(gym.Env):
         super(OptionHedgingEnv, self).__init__()
         self.data = data.reset_index(drop=True)
         self.current_step = 0
-        self.action_space = gym.spaces.Discrete(3)  # Buy, Hold, Sell
+        self.action_space = gym.spaces.Discrete(3) 
         self.observation_space = gym.spaces.Box(low=-np.inf, high=np.inf, shape=(data.shape[1] - 3,), dtype=np.float32)
-        self.position = 0  # Initial position: 0 (no position)
-        self.xi = xi  # Risk aversion parameter
-        self.transaction_cost_proportion = transaction_cost_proportion  # Proportional transaction cost
-        self.wealth = 0.0  # Initialize wealth
+        self.position = 0 
+        self.xi = xi  
+        self.transaction_cost_proportion = transaction_cost_proportion  
+        self.wealth = 0.0 
 
     def reset(self):
         self.current_step = 0
@@ -30,10 +30,8 @@ class OptionHedgingEnv(gym.Env):
         curr_bid_price = self.data.iloc[self.current_step]['bid']
         curr_ask_price = self.data.iloc[self.current_step]['ask']
 
-        # Calculate the bid-ask spread
         bid_ask_spread = curr_ask_price - curr_bid_price
 
-        # Initialize P&L and Transaction Cost
         pnl = 0
         transaction_cost = 0
 
@@ -53,16 +51,15 @@ class OptionHedgingEnv(gym.Env):
             elif self.position == -1:
                 pnl = prev_price - curr_price
 
-        self.wealth += pnl  # Update wealth
+        self.wealth += pnl 
 
-        # Calculate reward based on P&L minus penalty
         reward = pnl - self.xi * abs(pnl)
 
         done = self.current_step == len(self.data) - 1
         return obs, reward, done, {}
 
 
-# Define the DQN Model with TensorFlow
+# Define the DQN Model
 def build_dqn_model(input_shape, output_shape):
     model = models.Sequential()
     model.add(layers.Dense(16, input_shape=input_shape, activation='relu'))
@@ -71,7 +68,7 @@ def build_dqn_model(input_shape, output_shape):
     model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=1e-3), loss='mse')
     return model
 
-# Experience Replay Memory
+# Set Replay Memory
 class ReplayMemory:
     def __init__(self, capacity):
         self.capacity = capacity
@@ -86,10 +83,9 @@ class ReplayMemory:
     def __len__(self):
         return len(self.memory)
 
-# Create the environments with a proportional transaction cost of 0.5
-train_env = OptionHedgingEnv(train_data_processed, xi=0.1, transaction_cost_proportion=0.5)
-validation_env = OptionHedgingEnv(validation_data_processed, xi=0.1, transaction_cost_proportion=0.5)
-test_env = OptionHedgingEnv(test_data_processed, xi=0.1, transaction_cost_proportion=0.5)
+train_env = OptionHedgingEnv(train_data, xi=0.1, transaction_cost_proportion=0.5)
+validation_env = OptionHedgingEnv(validation_data, xi=0.1, transaction_cost_proportion=0.5)
+test_env = OptionHedgingEnv(test_data, xi=0.1, transaction_cost_proportion=0.5)
 
 
 input_shape = (train_env.observation_space.shape[0],)
@@ -97,15 +93,14 @@ output_shape = train_env.action_space.n
 model = build_dqn_model(input_shape, output_shape)
 
 # Replay Memory
-memory = ReplayMemory(20)
+memory = ReplayMemory(80)
 
-# Training Parameters
 gamma = 0.95
 epsilon = 1.0
 epsilon_min = 0.1
 epsilon_decay = 0.995
 batch_size = 64
-num_episodes = 3
+num_episodes = 50
 
 # Action selection
 def select_action(state, epsilon):
@@ -136,7 +131,7 @@ def optimize_model():
 
     model.train_on_batch(batch_state, target_q_values)
 
-# Training loop with validation
+# Training phase
 for episode in range(num_episodes):
     # Training phase
     state = train_env.reset()
@@ -191,41 +186,3 @@ while True:
     state_test = next_state_test
     if done_test:
         break
-
-# Plot Validation Rewards and Errors
-plt.figure(figsize=(12, 6))
-plt.plot(validation_rewards, label='Cumulative Validation Rewards', color='blue')
-plt.xlabel('Steps')
-plt.ylabel('Cumulative Reward')
-plt.title('Cumulative Reward over Validation Steps')
-plt.legend()
-plt.show()
-
-plt.figure(figsize=(12, 6))
-plt.plot(actual_val_rewards, label='Actual Validation Rewards', color='green')
-plt.plot(predicted_val_rewards, label='Predicted Validation Rewards', color='red', linestyle='dashed')
-plt.xlabel('Steps')
-plt.ylabel('Reward')
-plt.title('Actual vs Predicted Validation Rewards')
-plt.legend()
-plt.show()
-
-# Plot Testing Rewards and Errors
-plt.figure(figsize=(12, 6))
-plt.plot(cumulative_test_rewards, label='Cumulative Testing Rewards', color='blue')
-plt.xlabel('Steps')
-plt.ylabel('Cumulative Reward')
-plt.title('Cumulative Reward over Testing Steps')
-plt.legend()
-plt.show()
-
-plt.figure(figsize=(12, 6))
-plt.plot(actual_test_rewards, label='Actual Testing Rewards', color='green')
-plt.plot(predicted_test_rewards, label='Predicted Testing Rewards', color='red', linestyle='dashed')
-plt.xlabel('Steps')
-plt.ylabel('Reward')
-plt.title('Actual vs Predicted Testing Rewards')
-plt.legend()
-plt.show()
-
-print(f"Total Test Set Reward: {total_reward_test}")
