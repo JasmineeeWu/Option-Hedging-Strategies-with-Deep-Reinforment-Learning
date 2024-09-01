@@ -90,7 +90,6 @@ buffer_size = 80
 batch_size = 64
 num_episodes = 50
 
-# Environment and Models Initialization
 train_env = OptionHedgingEnv(train_data, xi=0.1, transaction_cost_proportion=0.5)
 validation_env = OptionHedgingEnv(validation_data, xi=0.1, transaction_cost_proportion=0.5)
 test_env = OptionHedgingEnv(test_data, xi=0.1, transaction_cost_proportion=0.5)
