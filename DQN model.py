@@ -95,6 +95,7 @@ model = build_dqn_model(input_shape, output_shape)
 # Replay Memory
 memory = ReplayMemory(80)
 
+# Hyperparameters and Initialization
 gamma = 0.95
 epsilon = 1.0
 epsilon_min = 0.1
