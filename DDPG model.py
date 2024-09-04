@@ -65,9 +65,9 @@ class OptionHedgingEnv(gym.Env):
 # Define the Actor-Critic Models with TensorFlow
 def build_actor(input_shape, action_dim):
     model = models.Sequential()
-    model.add(layers.Dense(16, input_shape=input_shape, activation='relu', kernel_regularizer=tf.keras.regularizers.l2(0.01)))
+    model.add(layers.Dense(64, input_shape=input_shape, activation='relu', kernel_regularizer=tf.keras.regularizers.l2(0.01)))
     model.add(layers.Dropout(0.2))
-    model.add(layers.Dense(16, activation='relu', kernel_regularizer=tf.keras.regularizers.l2(0.01)))
+    model.add(layers.Dense(64, activation='relu', kernel_regularizer=tf.keras.regularizers.l2(0.01)))
     model.add(layers.Dense(action_dim, activation='tanh'))
     return model
 
@@ -76,8 +76,8 @@ def build_critic(input_shape, action_dim):
     state_input = layers.Input(shape=input_shape)
     action_input = layers.Input(shape=(action_dim,))
     concat = layers.Concatenate()([state_input, action_input])
-    x = layers.Dense(16, activation='relu')(concat)
-    x = layers.Dense(16, activation='relu')(x)
+    x = layers.Dense(64, activation='relu')(concat)
+    x = layers.Dense(64, activation='relu')(x)
     output = layers.Dense(1)(x)
     return models.Model(inputs=[state_input, action_input], outputs=output)
 
