@@ -95,7 +95,7 @@ model = build_dqn_model(input_shape, output_shape)
 # Replay Memory
 memory = ReplayMemory(80)
 
-# Hyperparameters and Initialization
+# Hyperparameters and Initialisation
 gamma = 0.95
 epsilon = 1.0
 epsilon_min = 0.1
@@ -110,8 +110,8 @@ def select_action(state, epsilon):
     q_values = model.predict(np.expand_dims(state, axis=0), verbose=0)
     return np.argmax(q_values[0])
 
-# Optimize the model
-def optimize_model():
+# Optimise the model
+def optimise_model():
     if len(memory) < batch_size:
         return
     transitions = memory.sample(batch_size)
@@ -143,7 +143,7 @@ for episode in range(num_episodes):
         memory.push((state, action, reward, next_state, done))
         state = next_state
         total_reward_train += reward
-        optimize_model()
+        optimise_model()
         if done:
             break
     epsilon = max(epsilon_min, epsilon * epsilon_decay)
