@@ -33,7 +33,7 @@ class OptionHedgingEnv(gym.Env):
         # Calculate the bid-ask spread
         bid_ask_spread = curr_ask_price - curr_bid_price
 
-        # Initialize P&L and Transaction Cost
+        # Initialise P&L and Transaction Cost
         pnl = 0
         transaction_cost = 0
 
@@ -53,16 +53,15 @@ class OptionHedgingEnv(gym.Env):
             elif self.position == -1:
                 pnl = prev_price - curr_price 
 
-        self.wealth += pnl  # Update wealth
+        self.wealth += pnl
 
-        # Calculate reward based on P&L minus penalty
         reward = pnl - self.xi * abs(pnl)
 
         done = self.current_step == len(self.data) - 1
         return obs, reward, done, {}
 
 
-# Define the Actor-Critic Models with TensorFlow
+# Define the Actor-Critic Models
 def build_actor(input_shape, action_dim):
     model = models.Sequential()
     model.add(layers.Dense(64, input_shape=input_shape, activation='relu', kernel_regularizer=tf.keras.regularizers.l2(0.01)))
@@ -81,7 +80,7 @@ def build_critic(input_shape, action_dim):
     output = layers.Dense(1)(x)
     return models.Model(inputs=[state_input, action_input], outputs=output)
 
-# Hyperparameters and Initialization
+# Hyperparameters and Initialisation
 gamma = 0.95
 tau = 0.01
 actor_lr = 1e-3
@@ -97,20 +96,16 @@ test_env = OptionHedgingEnv(test_data, xi=0.1, transaction_cost_proportion=0.5)
 input_shape = (train_env.observation_space.shape[0],)
 action_dim = train_env.action_space.shape[0]
 
-# Actor-Critic Models
 actor = build_actor(input_shape, action_dim)
 critic = build_critic(input_shape, action_dim)
 target_actor = build_actor(input_shape, action_dim)
 target_critic = build_critic(input_shape, action_dim)
 
-# Optimizers
 actor_optimizer = tf.keras.optimizers.Adam(learning_rate=actor_lr)
 critic_optimizer = tf.keras.optimizers.Adam(learning_rate=critic_lr)
 
-# Experience Replay Memory
 memory = deque(maxlen=buffer_size)
 
-# Target Network Initialization
 target_actor.set_weights(actor.get_weights())
 target_critic.set_weights(critic.get_weights())
 
