@@ -101,8 +101,8 @@ critic = build_critic(input_shape, action_dim)
 target_actor = build_actor(input_shape, action_dim)
 target_critic = build_critic(input_shape, action_dim)
 
-actor_optimizer = tf.keras.optimizers.Adam(learning_rate=actor_lr)
-critic_optimizer = tf.keras.optimizers.Adam(learning_rate=critic_lr)
+actor_optimiser = tf.keras.optimisers.Adam(learning_rate=actor_lr)
+critic_optimiser = tf.keras.optimisers.Adam(learning_rate=critic_lr)
 
 memory = deque(maxlen=buffer_size)
 
@@ -147,14 +147,14 @@ def train():
         critic_q_values = critic([states, actions], training=True)
         critic_loss = tf.reduce_mean(tf.square(target_values - critic_q_values))
     critic_grads = tape.gradient(critic_loss, critic.trainable_variables)
-    critic_optimizer.apply_gradients(zip(critic_grads, critic.trainable_variables))
+    critic_optimiser.apply_gradients(zip(critic_grads, critic.trainable_variables))
 
     # Actor update
     with tf.GradientTape() as tape:
         actions = actor(states, training=True)
         actor_loss = -tf.reduce_mean(critic([states, actions], training=False))
     actor_grads = tape.gradient(actor_loss, actor.trainable_variables)
-    actor_optimizer.apply_gradients(zip(actor_grads, actor.trainable_variables))
+    actor_optimiser.apply_gradients(zip(actor_grads, actor.trainable_variables))
 
     update_target_networks(tau)
 
